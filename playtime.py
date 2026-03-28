@@ -82,7 +82,7 @@ def player_turn(kept_dice, current_dice):
         turn = z + 1
         # Display turn
         print(f"--- Turn {turn} ---")
-        # Runs player roll funcion and reutrns up only what numbers the user is keeping
+        # Runs player roll funcion and returns up only what numbers the user is keeping
         kept_dice = player_roll(kept_dice, current_dice, turn)
         print("List currently shows ", kept_dice)
 
