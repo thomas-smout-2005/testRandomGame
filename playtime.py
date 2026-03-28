@@ -37,7 +37,7 @@ def dice_roll():
 
 
 # Function checks each position in the kept_dice list, to see if  value equal 0. If so, that means that number is a blank and needs to be rolled
-def player_roll(kept_dice, current_dice):
+def player_roll(kept_dice, current_dice, turn):
     # Checks each position in kept_dice
     for x in range(5):
         # If position is equal to zero, then a dice roll needs to be proformed
@@ -45,8 +45,10 @@ def player_roll(kept_dice, current_dice):
             # Dice roll is put into current dice so player can later chose what to keep
             current_dice[x-1] = dice_roll()
     print(current_dice)
-    kept_dice = choose_keep(current_dice)
-    return kept_dice
+    if turn < 3:
+        kept_dice = choose_keep(current_dice)
+        return kept_dice
+    return current_dice
 
 
 # Function asks user what rolls they want to keep
@@ -71,12 +73,20 @@ def main():
     # Starting list before any dice are rolled
     kept_dice = [0, 0, 0, 0, 0]
     current_dice = [0, 0, 0, 0, 0]
-    print("--- Turn 1 ---")
-    kept_dice = player_roll(kept_dice, current_dice)
-    print("List currently shows ", kept_dice)
-    print("--- Turn 2 ---")
-    kept_dice = player_roll(kept_dice, current_dice)
-    print("List currently shows ", kept_dice)
+    end_dice_result = player_turn(kept_dice, current_dice)
+    
+
+def player_turn(kept_dice, current_dice):
+    for z in range(3):
+        # turn equals the current number of player throws
+        turn = z + 1
+        # Display turn
+        print(f"--- Turn {turn} ---")
+        # Runs player roll funcion and reutrns up only what numbers the user is keeping
+        kept_dice = player_roll(kept_dice, current_dice, turn)
+        print("List currently shows ", kept_dice)
+
+
 
 
 main()
