@@ -1,9 +1,9 @@
 import random
 
-with open("file.txt", "w"):
+with open("catagory_scores.txt", "w"):
     pass
 
-catagories = ["Aces", "Twos", "Threes", "Fours", "Fives", "Sixes", "Three of a Kind", "Four of a Kind", "Full House", "Small Straight", "Long Straight", "YAHTEE", "Chance"]
+catagories = ["Aces", "Twos", "Threes", "Fours", "Fives", "Sixes", "Three of a Kind", "Four of a Kind", "Full House", "Short Straight", "Long Straight", "YAHTZEE", "Chance"]
 
 
 # Main function where everything starts and ends
@@ -29,10 +29,10 @@ def player_roll(kept_dice, current_dice, turn):
     # Checks each position in kept_dice
     for x in range(5):
         # If position is equal to zero, then a dice roll needs to be proformed
-        if kept_dice[x-1] == 0:
+        if kept_dice[x] == 0:
             # Dice roll is put into current dice so player can later chose what to keep
-            current_dice[x-1] = dice_roll()
-    print(current_dice)
+            current_dice[x] = dice_roll()
+    print(f"Roll {current_dice}")
     if turn < 3:
         kept_dice = choose_keep(current_dice)
         return kept_dice
@@ -61,10 +61,9 @@ def player_turn(kept_dice, current_dice):
         # turn equals the current number of player throws
         turn = z + 1
         # Display turn
-        print(f"--- Turn {turn} ---")
+        print(f"\n--- Turn {turn} ---")
         # Runs player roll funcion and returns up only what numbers the user is keeping
         kept_dice = player_roll(kept_dice, current_dice, turn)
-        print("List currently shows ", kept_dice)
     return kept_dice
 
 
@@ -74,7 +73,7 @@ def chose_catagory(end_dice_result):
         # Starting list before any dice are rolled
         kept_dice = [0, 0, 0, 0, 0]
         current_dice = [0, 0, 0, 0, 0]
-        print("-- Remaining Catagories --")
+        print("\n--- Remaining Catagories ---")
         # For loop, loops through all items in list catagories and outputs them
         for i in range(len(catagories)):
             # Printing formatting
@@ -84,11 +83,14 @@ def chose_catagory(end_dice_result):
         catagory_name = catagories[choice - 1]
         # Remove catagory from list
         catagories.pop(choice - 1)
-        # Works out how much that turn was worth
-        score_value = check_score(end_dice_result, catagory_name)
+        if len(catagories) > 0:
+            # Roll new dice for this category
+            new_result = player_turn([0,0,0,0,0], [0,0,0,0,0])
+            # Score the new roll
+            score_value = check_score(new_result, catagory_name)
         # Adds score value to list for later use
         add_score(score_value)
-    print("Game Over")
+    print("\nGame Over!")
 
 
 # Function to work out score achieved in chosen catagory
@@ -126,10 +128,10 @@ def check_score(end_dice_result, catagory_name):
     if catagory_name == "Full House" and sorted(counts.values())[-2:] == [2, 3]:
         return 25
     # short straight is needs to check for only four inclining numbers in a row, to do this it if the combinations of dice can match any of the correct types of short straights through every variation
-    if catagory_name == "Small Straight" and any(set(seq).issubset(end_dice_result) for seq in ([1,2,3,4],[2,3,4,5],[3,4,5,6])):
+    if catagory_name == "Short Straight" and any(set(seq).issubset(end_dice_result) for seq in ([1,2,3,4],[2,3,4,5],[3,4,5,6])):
         return 30
     # Long straight is simplier as we can just straighten the dice and check it against the two possible long straights
-    if catagory_name == "Large Straight" and straighten_values in ([1,2,3,4,5],[2,3,4,5,6]):
+    if catagory_name == "Long Straight" and straighten_values in ([1,2,3,4,5],[2,3,4,5,6]):
         return 40
     # Yahtzee is just the same as three or four of a kind, but this time we check for five matching dice
     if catagory_name == "YAHTZEE" and max(counts.values()) == 5:
@@ -144,13 +146,13 @@ def check_score(end_dice_result, catagory_name):
 
 # Function to add worked out score to text file
 def add_score(score_value):
-    with open("catagory_scores.txt", "w") as text_file:
-        text_file.write(score_value, "\n")
+    with open("catagory_scores.txt", "a") as text_file:
+        text_file.write(str(score_value) + "\n")
 
 
 def final_score():
     grand_total = 0
-    with open("catagory_score.txt", "r") as text_file:
+    with open("catagory_scores.txt", "r") as text_file:
         for line in text_file:
             value = int(line.strip())
             grand_total = grand_total + value
