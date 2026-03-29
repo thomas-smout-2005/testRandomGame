@@ -1,33 +1,21 @@
 import random
 
+with open("file.txt", "w"):
+    pass
 
-"""
-list = []
-list.append(3)
-list.append(4)
-list.append(4)
-print(list)
+catagories = ["Aces", "Twos", "Threes", "Fours", "Fives", "Sixes", "Three of a Kind", "Four of a Kind", "Full House", "Small Straight", "Long Straight", "YAHTEE", "Chance"]
 
-how_many = list.count(3)
-print(how_many)
-"""
 
-"""
-throw = []
-
-def dice_roll():
-    dice = random.randint(1, 6)
-    return dice
-
-for _ in range(5):
-    throw.append(dice_roll())
-
-print(throw)
-print(throw[0])
-
-print(f"Dice : [a.{throw[0]}] [b.{throw[1]}] [c.{throw[2]}] [d.{throw[3]}] [e.{throw[4]}]")
-user_input = input("Which dice would you like to keep? (e.g., 2 4 5) or press Enter to roll again: ")
-"""
+# Main function where everything starts and ends
+def main():
+    # Starting list before any dice are rolled
+    kept_dice = [0, 0, 0, 0, 0]
+    current_dice = [0, 0, 0, 0, 0]
+    # Runs all three dice rolls
+    end_dice_result = player_turn(kept_dice, current_dice)
+    chose_catagory(end_dice_result)
+    grand_total = final_score()
+    print(f"Your Grand Total is {grand_total}")
 
 
 # Function generates one random number from 1 to 6 to simulate a dice
@@ -66,14 +54,6 @@ def choose_keep(current_dice):
         # kept_dice will be taken to next turn, whist current_dice just shows what was rolled this turn
         kept_dice[position] = current_dice[position]
     return kept_dice
-
-
-# Main function where everything starts and ends
-def main():
-    # Starting list before any dice are rolled
-    kept_dice = [0, 0, 0, 0, 0]
-    current_dice = [0, 0, 0, 0, 0]
-    end_dice_result = player_turn(kept_dice, current_dice)
     
 
 def player_turn(kept_dice, current_dice):
@@ -85,7 +65,96 @@ def player_turn(kept_dice, current_dice):
         # Runs player roll funcion and returns up only what numbers the user is keeping
         kept_dice = player_roll(kept_dice, current_dice, turn)
         print("List currently shows ", kept_dice)
+    return kept_dice
 
+
+def chose_catagory(end_dice_result):
+    # While catagories has anything in it, game/loop continues
+    while catagories:
+        # Starting list before any dice are rolled
+        kept_dice = [0, 0, 0, 0, 0]
+        current_dice = [0, 0, 0, 0, 0]
+        print("-- Remaining Catagories --")
+        # For loop, loops through all items in list catagories and outputs them
+        for i in range(len(catagories)):
+            # Printing formatting
+            print(f"{i+1}. {catagories[i]}")
+        # Asking user what they want to choose
+        choice = int(input("What catagory do you want to put this in? (e.g., 4) : "))
+        catagory_name = catagories[choice - 1]
+        # Remove catagory from list
+        catagories.pop(choice - 1)
+        # Works out how much that turn was worth
+        score_value = check_score(end_dice_result, catagory_name)
+        # Adds score value to list for later use
+        add_score(score_value)
+    print("Game Over")
+
+
+# Function to work out score achieved in chosen catagory
+def check_score(end_dice_result, catagory_name):
+    # List created for any matches
+    counts = {}
+    # For loop, goes through all numbers a dice can produce
+    for j in range(1, 7):
+        counts[j] = end_dice_result.count(j)
+    # This value will be used for scoring the straights, by sorting them into acending order
+    straighten_values = sorted(end_dice_result)
+    # Goes through each number and counts how many of that specific there are
+    if catagory_name == "Aces":
+        # Returns count times number it was counting for score
+        return counts[1] * 1
+    if catagory_name == "Twos":
+        return counts[2] * 2
+    if catagory_name == "Threes":
+        return counts[3] * 3
+    if catagory_name == "Fours":
+        return counts[4] * 4
+    if catagory_name == "Fives":
+        return counts[5] * 5
+    if catagory_name == "Sixes":
+        return counts[6] * 6
+    # Checks if this is the catagory chosen but also checks that the counts list has atleast three matching values
+    if catagory_name == "Three of a Kind" and max(counts.values()) >= 3:
+        # After check, three of a kind is just the sum of all dice
+        return sum(end_dice_result)
+    # Same as three of a kind but checks for atleast four of the same value
+    if catagory_name == "Four of a Kind" and max(counts.values()) >= 4:
+        # Same as three of a kind, sum of all dice
+        return sum(end_dice_result)
+    # Full house needs to check if the counts like has atleast three matching values and another two matching values ontop
+    if catagory_name == "Full House" and sorted(counts.values())[-2:] == [2, 3]:
+        return 25
+    # short straight is needs to check for only four inclining numbers in a row, to do this it if the combinations of dice can match any of the correct types of short straights through every variation
+    if catagory_name == "Small Straight" and any(set(seq).issubset(end_dice_result) for seq in ([1,2,3,4],[2,3,4,5],[3,4,5,6])):
+        return 30
+    # Long straight is simplier as we can just straighten the dice and check it against the two possible long straights
+    if catagory_name == "Large Straight" and straighten_values in ([1,2,3,4,5],[2,3,4,5,6]):
+        return 40
+    # Yahtzee is just the same as three or four of a kind, but this time we check for five matching dice
+    if catagory_name == "YAHTZEE" and max(counts.values()) == 5:
+        return 50
+    # Chance is just the addition of all dice
+    if catagory_name == "Chance":
+        # Add all dice and return
+        return sum(end_dice_result)
+    # If it fails any of the above, the score is zero
+    return 0
+
+
+# Function to add worked out score to text file
+def add_score(score_value):
+    with open("catagory_scores.txt", "w") as text_file:
+        text_file.write(score_value, "\n")
+
+
+def final_score():
+    grand_total = 0
+    with open("catagory_score.txt", "r") as text_file:
+        for line in text_file:
+            value = int(line.strip())
+            grand_total = grand_total + value
+    return grand_total
 
 
 
