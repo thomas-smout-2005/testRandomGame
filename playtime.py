@@ -1,8 +1,10 @@
 import random
 
+# resets the score text file to blank
 with open("catagory_scores.txt", "w"):
     pass
 
+# catagories that can be scored in
 catagories = ["Aces", "Twos", "Threes", "Fours", "Fives", "Sixes", "Three of a Kind", "Four of a Kind", "Full House", "Short Straight", "Long Straight", "YAHTZEE", "Chance"]
 
 
@@ -33,7 +35,9 @@ def player_roll(kept_dice, current_dice, turn):
             # Dice roll is put into current dice so player can later chose what to keep
             current_dice[x] = dice_roll()
     print(f"Roll {current_dice}")
+    # This is command checks if it's the 3rd roll yet. If so, then it doesn't fun this code as theres no need
     if turn < 3:
+        # Uses function to allow use to choose what to keep
         kept_dice = choose_keep(current_dice)
         return kept_dice
     return current_dice
@@ -151,7 +155,9 @@ def add_score(score_value):
 
 
 def final_score():
+    # Grand total starts at zero
     grand_total = 0
+    # Read through every line in the .txt, translate them to integers and add them to the current grand total until all lines are read
     with open("catagory_scores.txt", "r") as text_file:
         for line in text_file:
             value = int(line.strip())
